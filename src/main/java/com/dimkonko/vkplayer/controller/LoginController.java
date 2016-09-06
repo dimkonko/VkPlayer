@@ -13,7 +13,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import com.dimkonko.jvkapi.model.VkUrl;
-import com.dimkonko.jvkapi.service.VkUserFactory;
+import com.dimkonko.jvkapi.service.VkTokenFactory;
 import com.dimkonko.jvkapi.service.VKAuthService;
 
 public class LoginController implements Initializable {
@@ -37,7 +37,7 @@ public class LoginController implements Initializable {
             VkUrl vkUrl = new VkUrl(webEngine.getLocation());
             if (vkAuth.wasAuthenticated(vkUrl)) {
                 vkUrl.process();
-                App.getInstance().login(VkUserFactory.createUser(vkUrl.getArgs()));
+                App.getInstance().login(VkTokenFactory.createToken(vkUrl.getArgs()));
             }
         } catch (MalformedURLException e) {
             e.printStackTrace();

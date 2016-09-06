@@ -2,6 +2,7 @@ package com.dimkonko.vkplayer;
 
 import java.io.IOException;
 
+import com.dimkonko.jvkapi.model.VkToken;
 import com.dimkonko.vkplayer.service.auth.AuthService;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -30,7 +31,7 @@ public class App extends Application {
         _stage = primaryStage;
 
         authService.loadToken();
-        if (authService.isAuthorized()) {
+        if (authService.isAuthorized() && !authService.sessionExpired()) {
             changeScene(SceneType.MUSIC_VIEW);
         } else {
             changeScene(SceneType.LOGIN);
@@ -50,9 +51,9 @@ public class App extends Application {
         _stage.sizeToScene();
         _stage.show();
     }
-// 887ee04e5edd8e303c619641e985fafef05d2fe4d696809a37fa263734e0853d1a26bf87b7bbe71a3ce6f
-    public void login(VkUser vkUser) {
-        authService.authorize(vkUser);
+
+    public void login(VkToken token) {
+        authService.authorize(token);
         changeScene(SceneType.MUSIC_VIEW);
     }
 
@@ -60,8 +61,8 @@ public class App extends Application {
         changeScene(SceneType.LOGIN);
     }
 
-    public VkUser getUser() {
-        return authService.getUser();
+    public VkToken getToken() {
+        return authService.getToken();
     }
 
     public static App getInstance() {

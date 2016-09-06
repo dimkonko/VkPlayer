@@ -2,6 +2,7 @@ package com.dimkonko.jvkapi.model;
 
 import com.sun.istack.internal.NotNull;
 
+@Deprecated
 public class VkUser {
 
     private final String accessToken;

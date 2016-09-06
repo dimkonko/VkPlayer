@@ -1,4 +1,4 @@
-package com.dimkonko.vkplayer.json.model;
+package com.dimkonko.vkplayer.model.json;
 
 public final class AudioModel {
 
@@ -6,11 +6,11 @@ public final class AudioModel {
     private final String artist;
     private final String title;
     private final String url;
-    private final String duration; //203
+    private final int duration; //203
     private String lyricsId; // "125325"
     private int genre; // 15
 
-    public AudioModel(String aid, String artist, String title, String url, String duration) {
+    public AudioModel(String aid, String artist, String title, String url, int duration) {
         this.aid = aid;
         this.artist = artist;
         this.title = title;
@@ -18,7 +18,7 @@ public final class AudioModel {
         this.duration = duration;
     }
 
-    public String getAid() {
+    public String getSid() {
         return aid;
     }
 
@@ -34,7 +34,7 @@ public final class AudioModel {
         return url;
     }
 
-    public String getDuration() {
+    public int getDuration() {
         return duration;
     }
 

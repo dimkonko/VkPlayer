@@ -1,8 +1,7 @@
 package com.dimkonko.vkplayer.service;
 
 import com.dimkonko.jvkapi.model.VkError;
-import com.dimkonko.jvkapi.model.VkUser;
-import com.dimkonko.vkplayer.json.model.AudioModel;
+import com.dimkonko.vkplayer.model.json.AudioModel;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -49,16 +48,11 @@ public class JsonMapper {
                 jsonAudio.get("artist").asText(),
                 jsonAudio.get("title").asText(),
                 jsonAudio.get("url").asText(),
-                jsonAudio.get("duration").asText()
+                jsonAudio.get("duration").asInt()
                 // There  are some track, which doesn't have lyrics or genre fields
 //                jsonAudio.get("lyrics_id").asText(),
 //                jsonAudio.get("genre").asInt()
                 );
-    }
-
-    public static VkUser parseUser(JsonNode jsonUser) {
-        return new VkUser(jsonUser.get("owner_id").asText(),
-                jsonUser.get("access_token").asText());
     }
 
     public static VkError parseError(JsonNode jsonError) {

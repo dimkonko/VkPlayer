@@ -1,6 +1,6 @@
 package net.dimkonko.vkmlj.services;
 
-import com.dimkonko.vkplayer.json.model.AudioModel;
+import com.dimkonko.vkplayer.model.json.AudioModel;
 
 import java.io.*;
 import java.net.URL;
@@ -39,7 +39,7 @@ public class AudioLoader {
         public void start(File audioFile, AudioModel audioModel) {
             this.audioFile = audioFile;
             this.audioModel = audioModel;
-            this.thread = new Thread(this, audioModel.getAid());
+            this.thread = new Thread(this, audioModel.getSid());
             thread.start();
         }
 

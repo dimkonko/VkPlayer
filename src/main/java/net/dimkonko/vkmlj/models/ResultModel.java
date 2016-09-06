@@ -1,6 +1,6 @@
 package net.dimkonko.vkmlj.models;
 
-import com.dimkonko.vkplayer.json.model.AudioModel;
+import com.dimkonko.vkplayer.model.json.AudioModel;
 
 import java.util.List;
 

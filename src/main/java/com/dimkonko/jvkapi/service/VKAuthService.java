@@ -1,20 +1,15 @@
 package com.dimkonko.jvkapi.service;
 
-import com.dimkonko.jvkapi.etc.VkFields;
-import com.dimkonko.jvkapi.model.VkResponse;
-import com.dimkonko.jvkapi.model.VkUrl;
-import com.dimkonko.jvkapi.model.VkUser;
-import com.sun.istack.internal.NotNull;
 import com.dimkonko.jvkapi.etc.VkConstants;
-
-import java.util.HashMap;
-import java.util.Map;
+import com.dimkonko.jvkapi.model.VkUrl;
+import com.sun.istack.internal.NotNull;
 
 /**
  * Class to create OAUTH2 link
  */
 public class VKAuthService {
     private static final String REDIRECT_URL = "https://oauth.vk.com/blank.html";
+    // TODO: create interface to init these values
     private static final String OAUTH_URL_PATTERN = "https://oauth.vk.com/authorize?" +
             "client_id=%1$s&" +
             "scope=audio&" +
