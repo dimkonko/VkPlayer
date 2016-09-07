@@ -31,11 +31,11 @@
             <RowConstraints maxHeight="62.0" minHeight="10.0" prefHeight="57.0" vgrow="SOMETIMES" />
          </rowConstraints>
          <children>
-            <Button mnemonicParsing="false" text="Prev" />
-            <Button fx:id="playButton" defaultButton="true" mnemonicParsing="false" onAction="#onPlayClick" text="text" textAlignment="CENTER" GridPane.columnIndex="1" />
-            <Button mnemonicParsing="false" text="Next" GridPane.columnIndex="2" />
+            <Button fx:id="prevButton" mnemonicParsing="false" onAction="#onPrevClick" text="Prev" GridPane.columnIndex="0" />
+            <Button fx:id="playButton" defaultButton="true" mnemonicParsing="false" onAction="#onPlayClick" text="text" GridPane.columnIndex="1" />
+            <Button fx:id="nextButton" mnemonicParsing="false" text="Next" onAction="#onNextClick" GridPane.columnIndex="2" />
             <Label fx:id="timeLabel" alignment="BASELINE_CENTER" prefHeight="17.0" prefWidth="98.0" text="mmm:ss/mmm:ss" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
-            <Slider fx:id="timeSlider" blockIncrement="1.0" prefHeight="14.0" prefWidth="215.0" GridPane.columnIndex="3">
+            <Slider fx:id="timeSlider" blockIncrement="1.0" cacheShape="false" centerShape="false" depthTest="ENABLE" focusTraversable="false" maxHeight="8.0" minHeight="8.0" onMouseReleased="#onTimeSliderMouseReleased" pickOnBounds="false" prefHeight="8.0" prefWidth="215.0" scaleShape="false" snapToPixel="false" stylesheets="@css/main.css" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS">
                <cursor>
                   <Cursor fx:constant="HAND" />
                </cursor></Slider>

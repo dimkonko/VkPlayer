@@ -1,87 +1,106 @@
 package com.dimkonko.vkplayer.controller;
 
-import com.dimkonko.jvkapi.model.VkToken;
-import com.dimkonko.vkplayer.App;
-import com.dimkonko.vkplayer.api.VkClient;
-import com.dimkonko.vkplayer.exception.AccessTokenFailedException;
-import com.dimkonko.vkplayer.exception.BadRequestException;
 import com.dimkonko.vkplayer.model.json.AudioModel;
 import com.dimkonko.vkplayer.player.AudioPlayer;
 import com.dimkonko.vkplayer.service.TImeUtils;
-import javafx.beans.InvalidationListener;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
+import com.dimkonko.vkplayer.task.LoadAudioListTask;
+import com.sun.istack.internal.NotNull;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.input.ScrollEvent;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
-import javafx.scene.media.MediaView;
 import javafx.util.Duration;
-import javazoom.jl.decoder.JavaLayerException;
 
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
-import java.io.IOException;
 import java.net.URL;
-import java.util.List;
-import java.util.Observable;
 import java.util.ResourceBundle;
 
+/**
+ * Controller for musicView.fxml
+ */
 public class MusicController implements Initializable {
     private static final String TIME_PATTERN = "%s/%s";
 
     @FXML private Label titleLabel;
+    @FXML private Button prevButton;
     @FXML private Button playButton;
+    @FXML private Button nextButton;
     @FXML public Slider timeSlider;
     @FXML private Label timeLabel;
     @FXML public ListView<AudioModel> playlistView;
-    @FXML public MediaView mView;
 
-    private final VkClient vkClient = VkClient.getInstance();
     private final AudioPlayer audioPlayer = new AudioPlayer();
-//    private final AudioLoader audioLoader = new AudioLoader("Downloads/");
 
+    private int audioInPlaylistIndex;
+    private Control[] clickableControls;
+    private boolean isAudioInitialized;
+
+    @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        playButton.setText("Play");
-        playButton.setDisable(true);
-        setTimeLabelText(getTimeText(0), getTimeText(0));
-
-        timeSlider.valueProperty().addListener(new InvalidationListener() {
-            @Override
-            public void invalidated(javafx.beans.Observable observable) {
-                if (timeSlider.isValueChanging()) {
-                    audioPlayer.seek(new Duration(timeSlider.getValue() * 1000));
-                }
-            }
-        });
-
+        clickableControls = new Control[] {prevButton, playButton, nextButton, timeSlider, playlistView};
+        resetControls();
         loadAudio();
     }
 
-    private void loadAudio() {
-        //http://cs1-19v4.vk-cdn.net/p34/a518c388da82a6.mp3?extra=Ob0WJ_mMi3x5XKCAqyDecQTYKTwCvnjrZzr0HjhPz0LWBYOhtPsK8RUSloESrh0cAR9hoSRNyoA-I802TEXy2p3-I5-Vm2CbjyQAvrCNeUVVVt1EPk303Eo_2KAra4UpIZNm5i2hJ8Xp
-        VkToken token = App.getInstance().getToken();
-        try {
-            // TODO: Combine these 2 lines
-            List<AudioModel> audioList = vkClient.getAudios(token);
-            playlistView.setItems(FXCollections.observableArrayList(audioList));
-            //        audioList.stream().map(a -> a.toString()).collect(Collectors.toList())));
-        } catch (BadRequestException e) {
-            e.printStackTrace();
-        } catch (AccessTokenFailedException e) {
-            App.getInstance().logout();
-        }
+    /**
+     * Resets controls to default state and values
+     */
+    private void resetControls() {
+        playButton.setText("Play");
+        toggleClickableControls(true);
+        setTimeLabelText(TImeUtils.ZERO_TIME, TImeUtils.ZERO_TIME);
+        audioInPlaylistIndex = -1;
+    }
 
+    /**
+     * Enables or disables clickable controls by given param
+     * @param isDisabled value to ael for all clickable elements
+     */
+    private void toggleClickableControls(boolean isDisabled) {
+        for (Control control : clickableControls) {
+            control.setDisable(isDisabled);
+        }
+    }
+
+    private void loadAudio() {
+        LoadAudioListTask loadAudioListTask = new LoadAudioListTask();
+        loadAudioListTask.setOnSucceeded(event -> {
+            playlistView.setItems(loadAudioListTask.getValue());
+            playlistView.setDisable(false);
+        });
+        new Thread(loadAudioListTask).start();
+    }
+
+
+    @FXML
+    public void onPrevClick() {
+        int prevItem = audioInPlaylistIndex - 1;
+        if (prevItem >= 0) {
+            playlistView.getSelectionModel().select(prevItem);
+            changeAudio(playlistView.getItems().get(prevItem));
+            if (nextButton.isDisable()) {
+                nextButton.setDisable(false);
+            }
+        } else {
+            prevButton.setDisable(true);
+        }
     }
 
     @FXML
-    public void onPlayClick(ActionEvent actionEvent) throws JavaLayerException {
+    public void onNextClick() {
+        int nextItem = audioInPlaylistIndex + 1;
+        if (nextItem < playlistView.getItems().size()) {
+            playlistView.getSelectionModel().select(nextItem);
+            changeAudio(playlistView.getItems().get(nextItem));
+            if (prevButton.isDisable()) {
+                prevButton.setDisable(false);
+            }
+        } else {
+            nextButton.setDisable(true);
+        }
+    }
+
+    @FXML
+    protected void onPlayClick() {
         if (audioPlayer.isPlaying()) {
             audioPlayer.pause();
             playButton.setText("Play");
@@ -92,41 +111,63 @@ public class MusicController implements Initializable {
     }
 
     @FXML
-    public void onPlaylistViewMouseClicked(MouseEvent mouseEvent) {
+    protected void onTimeSliderMouseReleased() {
+        audioPlayer.seek(new Duration(timeSlider.getValue() * 1000));
+    }
+
+    @FXML
+    protected void onPlaylistViewMouseClicked(MouseEvent mouseEvent) {
         if (mouseEvent.getClickCount() == 2) {
+            if (!isAudioInitialized) {
+                isAudioInitialized = true;
+                toggleClickableControls(false);
+            }
             AudioModel audio = playlistView.getSelectionModel().getSelectedItem();
-            try {
+            // Check if audio selected, because list view can be empty
+            if (audio != null) {
                 changeAudio(audio);
                 System.out.println("Audio changed to: " + audio);
-            } catch (Exception e) {
-                e.printStackTrace();
             }
         }
     }
 
-    private void setTimeLabelText(String currentTime, String totalTime) {
-        String timeLabelText = String.format(TIME_PATTERN, currentTime, totalTime);
-        timeLabel.setText(timeLabelText);
+    /**
+     * Checks prev. and next. button states.
+     * Disable prev. button if current audio in playlist is a first or enable if not.
+     * Disable next. button if current audio in playlist is a last or enable if not.
+     */
+    private void checkPrevNextButtonStates() {
+        if (audioInPlaylistIndex == 0) {
+            prevButton.setDisable(true);
+        } else if (prevButton.isDisable()) {
+            prevButton.setDisable(false);
+        } else if (audioInPlaylistIndex == playlistView.getItems().size() - 1) {
+            nextButton.setDisable(true);
+        } else if (nextButton.isDisable()) {
+            nextButton.setDisable(false);
+        }
     }
 
-    private void changeAudio(AudioModel audio) throws IOException, JavaLayerException {
-        if (audioPlayer.isPlaying()) {
-            audioPlayer.pause();
-        }
+    /**
+     * Change audio in player with given audio
+     * @param audio audio, which will be played
+     */
+    private void changeAudio(@NotNull AudioModel audio) {
+        audioInPlaylistIndex = playlistView.getSelectionModel().getSelectedIndex();
+        checkPrevNextButtonStates();
+        // Change audio in the player
         audioPlayer.changeAudio(audio);
-        audioPlayer.getMeadiaPlayer().currentTimeProperty().addListener(new ChangeListener<Duration>() {
-            @Override
-            public void changed(ObservableValue<? extends Duration> observable, Duration oldValue, Duration newValue) {
-                if (!timeSlider.isValueChanging()) {
-                    timeSlider.setValue(newValue.toSeconds());
-                }
-                setTimeLabelText(getTimeText((int) newValue.toSeconds()), getTimeText(audio.getDuration()));
+        audioPlayer.getMeadiaPlayer().currentTimeProperty().addListener((observable, oldValue, newValue) -> {
+            if (!timeSlider.isValueChanging() && !timeSlider.isPressed()) {
+                timeSlider.setValue(newValue.toSeconds());
             }
+            setTimeLabelText(TImeUtils.getFormattedTime((int) newValue.toSeconds()),
+                    TImeUtils.getFormattedTime(audio.getDuration()));
         });
+        // Update UI
         timeSlider.setMax(audio.getDuration());
-        // Reset components
         titleLabel.setText(audio.toString());
-        setTimeLabelText(getTimeText(0), getTimeText(audio.getDuration()));
+        setTimeLabelText(TImeUtils.ZERO_TIME, TImeUtils.getFormattedTime(audio.getDuration()));
         if (audioPlayer.isPlaying()) {
             playButton.setText("Play");
         } else if (audioPlayer.isPaused()) {
@@ -135,9 +176,12 @@ public class MusicController implements Initializable {
         if (playButton.isDisable()) {
             playButton.setDisable(false);
         }
+        // Play new audio
+        audioPlayer.play();
     }
 
-    private String getTimeText(int seconds) {
-        return TImeUtils.getFormattedTime(seconds);
+    private void setTimeLabelText(String currentTime, String totalTime) {
+        String timeLabelText = String.format(TIME_PATTERN, currentTime, totalTime);
+        timeLabel.setText(timeLabelText);
     }
 }

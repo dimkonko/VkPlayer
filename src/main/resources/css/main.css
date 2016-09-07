@@ -1,4 +1,7 @@
-.slider .thumb {
-    -fx-pref-height: 12;
-    -fx-pref-width: 6;
+.thumb {
+    -fx-pref-height: 8;
+    -fx-pref-width: 8;
+}
+.slider {
+    -fx-padding: 0;
 }

@@ -1,21 +1,13 @@
 package com.dimkonko.vkplayer.player;
 
 import com.dimkonko.vkplayer.model.json.AudioModel;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
-import javazoom.jl.decoder.JavaLayerException;
 
 public class AudioPlayer {
 
     private MediaPlayer player;
-    private int currentTime = 0;
-
-    public AudioPlayer() {
-        currentTime = 0;
-    }
 
     public boolean isPaused() {
         return player != null && player.getStatus() != MediaPlayer.Status.PLAYING;
@@ -26,11 +18,14 @@ public class AudioPlayer {
     }
 
     public void changeAudio(AudioModel audio) {
+        if (player != null) {
+            player.dispose();
+        }
         player = new MediaPlayer(new Media(audio.getUrl()));
-        player.setAutoPlay(true);
+        player.setAutoPlay(false);
     }
 
-    public void play() throws JavaLayerException {
+    public void play() {
         player.play();
     }
 

@@ -4,6 +4,9 @@ public class TImeUtils {
     private static final int SECONDS_IN_MINUTE = 60;
     private static final String TIME_FORMAT = "%02d:%02d";
 
+    /** 00:00 String */
+    public static final String ZERO_TIME = getFormattedTime(0);
+
     /**
      * Generate time String from given seconds
      * Example: 00:15
